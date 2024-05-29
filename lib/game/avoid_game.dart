@@ -27,7 +27,7 @@ class AvoidGame extends FlameGame {
     add(player);
 
     // 每隔 1 秒创建一个子弹
-    timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+    timer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
       createBullet();
     });
 
@@ -101,17 +101,22 @@ class AvoidGame extends FlameGame {
     var position = Vector2(x.toDouble(), y.toDouble());
 
     /// 计算角度
-    var angle = atan2(y - player.position.y, x - player.position.x);
+    // var angle = atan2(y - player.position.y, x - player.position.x);
+    /// 计算角度 偏移点为player绘制的中心点
+    var angle = atan2(y - player.position.y - player.radius,
+        x - player.position.x - player.radius);
 
     int seconds = random.nextInt(10);
 
     /// 计算速度
     var speed = seconds / 10 + 5;
+    speed = 10;
     bullets.add(Bullet(
       position: position,
       angle: angle,
       radius: radius.toDouble(),
       speed: speed,
+      showTrajectory: false,
     ));
   }
 
