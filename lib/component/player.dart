@@ -1,16 +1,19 @@
 import 'dart:async';
 
+import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
 
-class Player extends PositionComponent with DragCallbacks, HasGameRef {
+class Player extends PositionComponent
+    with DragCallbacks, HasGameRef, CollisionCallbacks {
   final double radius;
   final Paint _paint;
+  Color color;
 
   Player({
     required this.radius,
-    required Color color,
+    required this.color,
   })  : _paint = Paint()..color = color,
         super(size: Vector2.all(radius * 2));
 
@@ -20,6 +23,14 @@ class Player extends PositionComponent with DragCallbacks, HasGameRef {
   FutureOr<void> onLoad() {
     // 设置圆形的初始位置为游戏界面的中心
     position = gameRef.size / 2 - Vector2(radius, radius);
+
+    // 添加矩形碰撞区
+    RectangleHitbox rHitBox = RectangleHitbox();
+    rHitBox
+      ..debugMode = true
+      ..debugColor = Colors.orange;
+    add(rHitBox);
+
     return super.onLoad();
   }
 
@@ -66,8 +77,15 @@ class Player extends PositionComponent with DragCallbacks, HasGameRef {
 
   @override
   void render(Canvas canvas) {
-    _paint.color = _isDragged ? Colors.yellow : Colors.red;
+    _paint.color = _isDragged ? Colors.yellow : this.color;
     canvas.drawCircle(Offset(radius, radius), radius, _paint);
+
+    // // 绘制player的碰撞检测区域
+    // final collisionAreaPaint = Paint()
+    //   ..color = Colors.red
+    //   ..style = PaintingStyle.stroke
+    //   ..strokeWidth = 2;
+    // canvas.drawCircle(Offset(radius, radius), radius, collisionAreaPaint);
   }
 
   // @override
@@ -87,5 +105,24 @@ class Player extends PositionComponent with DragCallbacks, HasGameRef {
   bool containsLocalPoint(Vector2 point) {
     final center = size / 2;
     return (point - center).length < radius;
+  }
+
+  @override
+  void onCollisionStart(
+      Set<Vector2> intersectionPoints, PositionComponent other) {
+    super.onCollisionStart(intersectionPoints, other);
+
+    // 碰撞开始时将线的颜色置为蓝色
+    color = Colors.red;
+    print('碰撞到 player');
+  }
+
+  @override
+  void onCollisionEnd(PositionComponent other) {
+    super.onCollisionEnd(other);
+    // 碰撞开始时将线的颜色置为黑色
+    Future.delayed(const Duration(seconds: 1), () {
+      color = Colors.blue;
+    });
   }
 }

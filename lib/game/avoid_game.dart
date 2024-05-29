@@ -8,7 +8,7 @@ import 'package:provider/provider.dart';
 import '../component/bullet.dart';
 import '../component/player.dart';
 
-class AvoidGame extends FlameGame {
+class AvoidGame extends FlameGame with HasCollisionDetection {
   final Paint paint = Paint()..color = const Color.fromARGB(255, 35, 36, 38);
   // final Paint paint = Paint()..color = Colors.blueGrey;
   final Path canvasPath = Path();
@@ -29,10 +29,11 @@ class AvoidGame extends FlameGame {
       radius: 20,
       color: Colors.blue,
     );
+    player.debugMode = true;
     add(player);
 
     // 每隔 1 秒创建一个子弹
-    timer = Timer.periodic(const Duration(milliseconds: 1000), (timer) {
+    timer = Timer.periodic(const Duration(milliseconds: 10000), (timer) {
       createBullet();
     });
 
@@ -60,28 +61,39 @@ class AvoidGame extends FlameGame {
     // player.render(canvas);
     //
     // 渲染所有的子弹
-    for (var bullet in bullets) {
-      bullet.render(canvas);
-    }
+    // for (var bullet in bullets) {
+    //   bullet.render(canvas);
+    // }
   }
 
   // @override
   void update(double dt) {
     super.update(dt);
 
-    // 更新所有的子弹
-    for (var bullet in bullets) {
-      bullet.update(dt);
+    // // 更新所有的子弹
+    // for (var bullet in bullets) {
+    //   bullet.update(dt);
+    //
+    //   // // 进行碰撞检测
+    //   // if (collisionCheck(bullet)) {
+    //   //   print('碰撞到 player');
+    //   //
+    //   //   // player受伤
+    //   //   final originalColor = Colors.blue;
+    //   //   print('originalColor: $originalColor');
+    //   //   player.color = Colors.red;
+    //   //
+    //   //   // Change color back to original after 3 seconds
+    //   //   Future.delayed(const Duration(seconds: 1), () {
+    //   //     player.color = originalColor;
+    //   //     print("player.color: ${player.color}");
+    //   //   });
+    //   // }
+    // }
+    //
+    // bullets.removeWhere((bullet) => bullet.isOutOfBounds(canvasSize));
 
-      // 进行碰撞检测
-      if (collisionCheck(bullet)) {
-        print('碰撞到 player');
-      }
-    }
-
-    bullets.removeWhere((bullet) => bullet.isOutOfBounds(canvasSize));
-
-    print('bullets.length: ${bullets.length}');
+    // print('bullets.length: ${bullets.length}');
   }
 
   bool collisionCheck(Bullet bullet) {
@@ -120,21 +132,24 @@ class AvoidGame extends FlameGame {
 
     /// 计算角度
     // var angle = atan2(y - player.position.y, x - player.position.x);
+
     /// 计算角度 偏移点为player绘制的中心点
     var angle = atan2(y - player.position.y - player.radius,
         x - player.position.x - player.radius);
 
-    int seconds = random.nextInt(10);
     final speedController =
         Provider.of<SpeedController>(buildContext!, listen: false);
 
-    bullets.add(Bullet(
+    final bullet = Bullet(
       position: position,
       angle: angle,
       radius: radius.toDouble(),
       speed: speedController.speed,
-      showTrajectory: false,
-    ));
+      showTrajectory: true,
+    );
+    // bullet.debugMode = true;
+    add(bullet);
+    // bullets.add(bullet);
   }
 
   @override

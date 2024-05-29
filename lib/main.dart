@@ -5,6 +5,8 @@ import 'package:provider/provider.dart';
 import 'game/avoid_game.dart';
 
 void main() {
+  // runApp(GameWidget(game: CollisionDetectionGame()));
+
   runApp(
     ChangeNotifierProvider(
       create: (context) => SpeedController(),
@@ -33,7 +35,7 @@ class MyApp extends StatelessWidget {
               game: AvoidGame(),
             ),
             Positioned(
-              bottom: 50,
+              top: 0,
               left: 20,
               right: 20,
               child: SpeedSlider(),
