@@ -65,20 +65,11 @@ class AvoidGame extends FlameGame {
     super.update(dt);
 
     // 更新所有的子弹
-    // for (var bullet in bullets) {
-    //   bullet.update(dt);
-    // }
-    bullets.removeWhere((bullet) {
+    for (var bullet in bullets) {
       bullet.update(dt);
+    }
 
-      // 检查子弹是否已经超出了游戏界面
-      bool isOutside = bullet.position.x < 0 ||
-          bullet.position.x > canvasSize.x ||
-          bullet.position.y < 0 ||
-          bullet.position.y > canvasSize.y;
-
-      return isOutside;
-    });
+    bullets.removeWhere((bullet) => bullet.isOutOfBounds(canvasSize));
 
     print('bullets.length: ${bullets.length}');
   }
@@ -117,10 +108,11 @@ class AvoidGame extends FlameGame {
     /// 计算速度
     var speed = seconds / 10 + 5;
     bullets.add(Bullet(
-        position: position,
-        angle: angle,
-        radius: radius.toDouble(),
-        speed: speed));
+      position: position,
+      angle: angle,
+      radius: radius.toDouble(),
+      speed: speed,
+    ));
   }
 
   @override
