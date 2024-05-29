@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../component/bullet.dart';
 import '../component/player.dart';
@@ -14,6 +15,10 @@ class AvoidGame extends FlameGame {
   late Player player;
   final random = Random();
   late Timer timer;
+  // final SpeedController speedController;
+
+  AvoidGame();
+
   List<Bullet> bullets = [];
 
   @override
@@ -27,7 +32,7 @@ class AvoidGame extends FlameGame {
     add(player);
 
     // 每隔 1 秒创建一个子弹
-    timer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
+    timer = Timer.periodic(const Duration(milliseconds: 1000), (timer) {
       createBullet();
     });
 
@@ -67,11 +72,24 @@ class AvoidGame extends FlameGame {
     // 更新所有的子弹
     for (var bullet in bullets) {
       bullet.update(dt);
+
+      // 进行碰撞检测
+      if (collisionCheck(bullet)) {
+        print('碰撞到 player');
+      }
     }
 
     bullets.removeWhere((bullet) => bullet.isOutOfBounds(canvasSize));
 
     print('bullets.length: ${bullets.length}');
+  }
+
+  bool collisionCheck(Bullet bullet) {
+    // 计算子弹和玩家之间的距离
+    double distance = bullet.position.distanceTo(player.position);
+
+    // 检查距离是否小于或等于子弹和玩家的半径之和
+    return distance <= bullet.radius + player.radius;
   }
 
   // @override
@@ -107,15 +125,14 @@ class AvoidGame extends FlameGame {
         x - player.position.x - player.radius);
 
     int seconds = random.nextInt(10);
+    final speedController =
+        Provider.of<SpeedController>(buildContext!, listen: false);
 
-    /// 计算速度
-    var speed = seconds / 10 + 5;
-    speed = 10;
     bullets.add(Bullet(
       position: position,
       angle: angle,
       radius: radius.toDouble(),
-      speed: speed,
+      speed: speedController.speed,
       showTrajectory: false,
     ));
   }
@@ -125,5 +142,16 @@ class AvoidGame extends FlameGame {
     super.onRemove();
     // 取消定时器
     timer.cancel();
+  }
+}
+
+class SpeedController extends ChangeNotifier {
+  double _speed = 1.0;
+
+  double get speed => _speed;
+
+  set speed(double value) {
+    _speed = value;
+    notifyListeners();
   }
 }
