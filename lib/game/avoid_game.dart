@@ -7,15 +7,16 @@ import 'package:provider/provider.dart';
 
 import '../component/bullet.dart';
 import '../component/player.dart';
+import '../component/rocket.dart';
 
-class AvoidGame extends FlameGame {
+class AvoidGame extends FlameGame with HasCollisionDetection {
   final Paint paint = Paint()..color = const Color.fromARGB(255, 35, 36, 38);
   // final Paint paint = Paint()..color = Colors.blueGrey;
   final Path canvasPath = Path();
   late Player player;
   final random = Random();
   late Timer timer;
-  // final SpeedController speedController;
+  // late SpeedController speedController;
 
   AvoidGame();
 
@@ -33,7 +34,8 @@ class AvoidGame extends FlameGame {
 
     // 每隔 1 秒创建一个子弹
     timer = Timer.periodic(const Duration(milliseconds: 1000), (timer) {
-      createBullet();
+      // createBullet();
+      createRocket();
     });
 
     return super.onLoad();
@@ -81,7 +83,7 @@ class AvoidGame extends FlameGame {
 
     bullets.removeWhere((bullet) => bullet.isOutOfBounds(canvasSize));
 
-    print('bullets.length: ${bullets.length}');
+    // print('bullets.length: ${bullets.length}');
   }
 
   bool collisionCheck(Bullet bullet) {
@@ -100,6 +102,9 @@ class AvoidGame extends FlameGame {
   // }
 
   void createBullet() {
+    final speedController =
+        Provider.of<SpeedController>(buildContext!, listen: false);
+
     /// 随机半径
     var radius = random.nextInt(10) + 5;
 
@@ -125,16 +130,43 @@ class AvoidGame extends FlameGame {
         x - player.position.x - player.radius);
 
     int seconds = random.nextInt(10);
-    final speedController =
-        Provider.of<SpeedController>(buildContext!, listen: false);
 
-    bullets.add(Bullet(
+    add(Bullet(
       position: position,
       angle: angle,
       radius: radius.toDouble(),
       speed: speedController.speed,
-      showTrajectory: false,
+      showTrajectory: true,
     ));
+
+    // bullets.add(Bullet(
+    //   position: position,
+    //   angle: angle,
+    //   radius: radius.toDouble(),
+    //   speed: speedController.speed,
+    //   showTrajectory: false,
+    // ));
+  }
+
+  void createRocket() {
+    final speedController =
+        Provider.of<SpeedController>(buildContext!, listen: false);
+
+    // 计算位置
+    final x = random.nextDouble() * size.x;
+    final y = random.nextDouble() * size.y;
+    final position = Vector2(x, y);
+
+    // 计算角度
+    // final angle = random.nextDouble() * 2 * pi;
+    // 计算角度为面向玩家
+    // final angle = atan2(y - player.position.y, x - player.position.x);
+    // 计算角度为面向玩家的中心点
+    final angle = atan2(player.position.y - y, player.position.x - x);
+
+    print(speedController.speed);
+
+    add(Rocket(position: position, angle: angle, speed: speedController.speed));
   }
 
   @override

@@ -1,10 +1,11 @@
 import 'dart:math';
 
+import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame/extensions.dart';
 import 'package:flutter/material.dart';
 
-class Bullet extends PositionComponent {
+class Bullet extends PositionComponent with CollisionCallbacks {
   //final Vector2 position;
   final double speed;
   final double angle;
@@ -25,6 +26,22 @@ class Bullet extends PositionComponent {
     this.radius = 10,
     this.showTrajectory = false,
   }) : super(position: position);
+
+  @override
+  Future<void> onLoad() async {
+    // 添加碰撞检测
+    RectangleHitbox rHitBox = RectangleHitbox();
+    rHitBox
+      ..size = Vector2(20, 20)
+      ..position = position
+      ..debugMode = true
+      ..renderShape = true
+      ..debugColor = Colors.red;
+    add(rHitBox);
+    print(size);
+
+    return super.onLoad();
+  }
 
   void render(Canvas canvas) {
     canvas.drawCircle(position.toOffset(), radius, paint);

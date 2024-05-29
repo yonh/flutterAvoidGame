@@ -1,10 +1,12 @@
 import 'dart:async';
 
+import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
 
-class Player extends PositionComponent with DragCallbacks, HasGameRef {
+class Player extends PositionComponent
+    with DragCallbacks, HasGameRef, CollisionCallbacks {
   final double radius;
   final Paint _paint;
 
@@ -20,6 +22,14 @@ class Player extends PositionComponent with DragCallbacks, HasGameRef {
   FutureOr<void> onLoad() {
     // 设置圆形的初始位置为游戏界面的中心
     position = gameRef.size / 2 - Vector2(radius, radius);
+
+    // 添加矩形碰撞区
+    RectangleHitbox rHitBox = RectangleHitbox();
+    rHitBox
+      ..debugMode = true
+      ..debugColor = Colors.orange;
+    add(rHitBox);
+
     return super.onLoad();
   }
 
